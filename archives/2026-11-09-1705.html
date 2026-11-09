@@ -1,0 +1,705 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Shekel &amp; Street</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: masthead hero band → news ticker → swipeable number rail → edition focus → filtered news cards → agenda → WhatsApp → archive → method note */
+:root{
+  --bg:#f2f4f8; --surface:#ffffff; --ink:#0f172a; --muted:#566079; --line:#dbe1eb;
+  --accent:#1d43c4; --accent-soft:#e5ebfc; --brass:#a87b22; --brass-soft:#f5ecd9;
+  --up:#0d7a49; --down:#c0311d; --flat:#566079;
+  --hero-a:#16349e; --hero-b:#0b1f63; --hero-ink:#ffffff; --hero-muted:#c8d3f5;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b101b; --surface:#141b2a; --ink:#e8ecf4; --muted:#98a3b9; --line:#253047;
+  --accent:#87a3ff; --accent-soft:#1b2648; --brass:#dcae55; --brass-soft:#2a2416;
+  --up:#41c88a; --down:#ff7b67; --flat:#98a3b9;
+  --hero-a:#1a3591; --hero-b:#0a1540; --hero-ink:#ffffff; --hero-muted:#b6c4f0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b101b; --surface:#141b2a; --ink:#e8ecf4; --muted:#98a3b9; --line:#253047;
+  --accent:#87a3ff; --accent-soft:#1b2648; --brass:#dcae55; --brass-soft:#2a2416;
+  --up:#41c88a; --down:#ff7b67; --flat:#98a3b9;
+  --hero-a:#1a3591; --hero-b:#0a1540; --hero-ink:#ffffff; --hero-muted:#b6c4f0; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px;border-radius:4px}
+.gut{padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.wrap{max-width:1120px;margin:0 auto}
+
+/* Masthead */
+.hero{background:linear-gradient(140deg,var(--hero-a),var(--hero-b));color:var(--hero-ink)}
+.hero .wrap{padding-block:28px 34px;display:grid;gap:14px}
+.brand{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:800;font-size:1.15rem;letter-spacing:.01em}
+.logo span{color:var(--brass)}
+.logo{display:flex;align-items:center;gap:14px} .logo .mark{width:66px;height:44px;color:var(--brass);flex:none} .logo .rule{width:1px;height:30px;background:var(--hero-muted);opacity:.5} .logo .word span{color:var(--brass)} .logo .word{font-size:1.25rem;color:var(--hero-ink)} @media (max-width:600px){.logo .mark{width:54px;height:36px}.logo .rule{height:24px}.logo .word{font-size:1.1rem}}
+.stamp{font-family:var(--mono);font-size:.78rem;color:var(--hero-muted)}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--hero-muted)}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(2.2rem,6vw,3.6rem);line-height:1;margin:0;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--brass)}
+.lede{max-width:68ch;margin:0;color:var(--hero-ink);opacity:.93;font-size:1.02rem}
+
+/* Ticker */
+.ticker{background:var(--surface);border-bottom:1px solid var(--line);overflow:hidden}
+.ticker-track{display:flex;gap:40px;width:max-content;padding-block:11px;animation:roll 70s linear infinite;font-size:.88rem}
+.ticker-track span b{font-family:var(--mono);font-weight:500;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--brass);margin-right:8px}
+.ticker:hover .ticker-track{animation-play-state:paused}
+@keyframes roll{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.ticker-track{animation:none;flex-wrap:wrap;width:auto;gap:8px 28px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}.ticker-track [aria-hidden]{display:none}}
+
+/* Section heads */
+.sec{padding-block:34px 0}
+.desk{font-family:var(--mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);margin:0 0 6px}
+.sec h2{font-family:var(--display);font-weight:700;font-size:1.55rem;line-height:1.15;margin:0 0 16px;text-wrap:balance}
+
+/* Number rail */
+.rail{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;scrollbar-width:thin}
+.tile{flex:0 0 300px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.tile.big{flex-basis:380px;background:var(--brass-soft);border-color:transparent}
+.tlabel{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tile.big .tlabel{color:var(--brass)}
+.tnum{font-family:var(--display);font-weight:800;font-size:3.4rem;line-height:1;color:var(--down)}
+.tile h3{font-family:var(--display);font-weight:700;font-size:1.12rem;line-height:1.25;margin:0}
+.tile p{margin:0;font-size:.92rem}
+.rows{display:grid;gap:0}
+.row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:baseline;padding-block:8px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.k{font-weight:600;font-size:.92rem;min-width:0}
+.k small{display:block;font-weight:400;color:var(--muted);font-size:.76rem;line-height:1.35}
+.v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.95rem;text-align:right}
+.chg{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.8rem;text-align:right;min-width:62px}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
+.src{font-size:.74rem;color:var(--muted);line-height:1.4}
+.hint{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin:4px 0 0}
+
+/* Edition focus */
+.focus{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.fbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.fbox h3{font-family:var(--display);font-size:1.05rem;margin:0 0 8px}
+.fbox ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:.92rem}
+.fbox.note{background:var(--accent-soft);border-color:transparent}
+
+/* News */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{font:inherit;font-size:.85rem;font-weight:600;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+.tag.hl{background:var(--brass-soft);color:var(--brass)}
+.cnum{font-family:var(--display);font-weight:800;font-size:2rem;line-height:1}
+.card h3{font-family:var(--display);font-weight:700;font-size:1.08rem;line-height:1.25;margin:0;text-wrap:balance}
+.card p{margin:0;font-size:.92rem}
+.card .foot{margin-top:auto;display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding-top:8px;border-top:1px solid var(--line)}
+.card .foot a{font-weight:600;font-size:.86rem;text-decoration:none;white-space:nowrap}
+.tk{margin:0;padding-left:18px;display:grid;gap:6px;font-size:.9rem}
+.cards.sa .card{background:var(--brass-soft);border-color:transparent}
+.cards.sa .tag{background:var(--surface);color:var(--brass)}
+
+/* Agenda */
+.agenda{display:grid;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ag{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:14px 18px;border-top:1px solid var(--line)}
+.ag:first-child{border-top:0}
+.ag .d{font-family:var(--mono);font-size:.8rem;color:var(--brass);font-weight:500}
+.ag ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:.92rem}
+@media (max-width:520px){.ag{grid-template-columns:1fr;gap:6px}}
+
+/* WhatsApp + archive */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px}
+.btn{font:inherit;font-weight:600;justify-self:start;padding:10px 18px;border-radius:10px;border:0;background:var(--accent);color:var(--surface);cursor:pointer}
+textarea{width:100%;min-height:220px;font-family:var(--mono);font-size:.8rem;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px}
+.status{font-size:.85rem;color:var(--up);min-height:1.2em}
+.arch{list-style:none;margin:0;padding:0;display:grid}
+.arch li{display:flex;justify-content:space-between;gap:12px;padding-block:10px;border-top:1px solid var(--line)}
+.arch li:first-child{border-top:0}
+.cur{font-family:var(--mono);font-size:.74rem;color:var(--brass)}
+
+.legal{font-size:.8rem;color:var(--muted);max-width:90ch;margin:0}
+footer{padding-block:34px 48px;display:grid;gap:14px}
+footer h2{font-family:var(--display);font-size:1.1rem;margin:0}
+
+/* Global view: FT + The Economist */
+.brief{list-style:none;margin:0;padding:0;display:grid;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.brief li{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:14px 18px;border-top:1px solid var(--line);font-size:.95rem}
+.brief li:first-child{border-top:0}
+.brief b{font-family:var(--mono);font-weight:500;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--brass);padding-top:3px}
+.sub{font-family:var(--display);font-weight:700;font-size:1.1rem;margin:22px 0 12px}
+
+/* Section jump bar (sticky, thumb-friendly) */
+html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(env(safe-area-inset-top, 0px) + 56px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--bg)}
+.jump{position:sticky;top:env(safe-area-inset-top, 0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.jump .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:8px;scrollbar-width:none}
+.jump .wrap::-webkit-scrollbar{display:none}
+.jump a{flex:0 0 auto;font-size:.84rem;font-weight:600;text-decoration:none;color:var(--ink);padding:7px 13px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+
+/* iPhone and other narrow screens */
+@media (max-width:600px){
+  body{font-size:16px;line-height:1.6}
+  .hero .wrap{padding-block:20px 24px;gap:10px}
+  .hero h1{font-size:2.1rem}
+  .lede{font-size:1rem}
+  .ticker-track{font-size:.92rem;padding-block:10px}
+  .sec{padding-block:28px 0}
+  .sec h2{font-size:1.32rem;margin-bottom:12px}
+  .rail{gap:10px;margin-inline:calc(-1 * max(16px, env(safe-area-inset-left, 0px)));padding-inline:max(16px, env(safe-area-inset-left, 0px));scroll-padding-inline:max(16px, env(safe-area-inset-left, 0px))}
+  .tile{flex-basis:86%;padding:16px}
+  .tile.big{flex-basis:92%}
+  .tnum{font-size:2.7rem}
+  .tile h3{font-size:1.15rem}
+  .tile p{font-size:1rem;line-height:1.6}
+  .k{font-size:.98rem}
+  .k small{font-size:.8rem}
+  .v{font-size:1rem}
+  .chg{min-width:58px;font-size:.86rem}
+  .src{font-size:.8rem}
+  .focus{grid-template-columns:1fr;gap:10px}
+  .fbox{padding:16px}
+  .fbox ul,.tk{font-size:1rem;line-height:1.55;gap:8px}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:calc(-1 * max(16px, env(safe-area-inset-left, 0px)));padding-inline:max(16px, env(safe-area-inset-left, 0px))}
+  .chip{flex:0 0 auto;padding:9px 16px;font-size:.92rem}
+  .cards{grid-template-columns:1fr;gap:12px}
+  .card{padding:16px;gap:10px}
+  .card h3{font-size:1.18rem}
+  .card p{font-size:1rem;line-height:1.6}
+  .cnum{font-size:1.75rem}
+  .card .foot{flex-wrap:wrap;align-items:center}
+  .card .foot a{padding:8px 0;font-size:.95rem}
+  .brief li{grid-template-columns:1fr;gap:4px;padding:14px 16px;font-size:1rem}
+  .ag{padding:14px 16px}
+  .ag ul{font-size:1rem}
+  .legal{font-size:.88rem}
+}
+</style>
+
+
+
+
+<header class="hero gut">
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo"><svg class="mark" viewBox="0 0 72 48" role="img" aria-label="OM"><g fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="24" r="12"/><line x1="20" y1="5" x2="20" y2="43"/><path d="M37 36V12l11.5 16L60 12v24"/></g></svg><span class="rule" aria-hidden="true"></span><span class="word">Shekel <span>&amp;</span> Street</span></div>
+      <div class="stamp">Monday 9 Nov 2026 · 17:05 Tel Aviv</div>
+    </div>
+    <div class="eyebrow">Afternoon edition · Wall Street first 30 minutes · TASE before the 17:25 close</div>
+    <h1>Good afternoon, <em>Tel Aviv.</em></h1>
+    <p class="lede">Dip buyers are back. Half an hour into the session the S&amp;P 500 is up 1.4% and the Nasdaq 100 2.5%, with chipmakers up 3.5%, even as Nvidia slides 5.6% over the spy scandal around Jensen Huang. Cheaper oil helps: Brent has fallen 4.4% to $94 after Trump said new strikes on Iran are "highly unlikely". The shekel is at 3.159 per dollar, its strongest in weeks, and the TA-125 is up 1.3% into the close, led by NextVision and insurers.</p>
+  </div>
+</header>
+
+<div class="ticker" aria-label="In brief">
+  <div class="ticker-track">
+    <span><b>Wall St</b>S&amp;P 500 +1.4%, Nasdaq 100 +2.5%, Dow +1.4% in early trade (Bloomberg)</span>
+    <span><b>Nvidia</b>−5.6% to $176; FT: suspected spy pitched GPU deals to Chinese investors</span>
+    <span><b>Oil</b>Brent $94.02 (−4.4%) as Trump calls new Iran strikes unlikely (Bloomberg)</span>
+    <span><b>Shekel</b>USD/ILS 3.1590 (−0.9%); dollar index −0.4% (Bloomberg)</span>
+    <span><b>TASE</b>TA-125 +1.3%; NextVision up ~10% on results, Partner +6% (Calcalist)</span>
+    <span><b>Israel</b>Budget deficit widens to 3.3% of GDP as defence spending climbs (Globes)</span>
+    <span><b>Anthropic</b>IPO marketing can start Tuesday; debut seen week of 16 Nov (Bloomberg)</span>
+    <span><b>CPI</b>US October CPI Tuesday 15:30; RBC sees core +0.3% m/m (FT)</span>
+    <span aria-hidden="true"><b>Wall St</b>S&amp;P 500 +1.4%, Nasdaq 100 +2.5%, Dow +1.4% in early trade (Bloomberg)</span>
+    <span aria-hidden="true"><b>Nvidia</b>−5.6% to $176; FT: suspected spy pitched GPU deals to Chinese investors</span>
+    <span aria-hidden="true"><b>Oil</b>Brent $94.02 (−4.4%) as Trump calls new Iran strikes unlikely (Bloomberg)</span>
+    <span aria-hidden="true"><b>Shekel</b>USD/ILS 3.1590 (−0.9%); dollar index −0.4% (Bloomberg)</span>
+    <span aria-hidden="true"><b>TASE</b>TA-125 +1.3%; NextVision up ~10% on results, Partner +6% (Calcalist)</span>
+    <span aria-hidden="true"><b>Israel</b>Budget deficit widens to 3.3% of GDP as defence spending climbs (Globes)</span>
+    <span aria-hidden="true"><b>Anthropic</b>IPO marketing can start Tuesday; debut seen week of 16 Nov (Bloomberg)</span>
+    <span aria-hidden="true"><b>CPI</b>US October CPI Tuesday 15:30; RBC sees core +0.3% m/m (FT)</span>
+  </div>
+</div>
+
+<nav class="jump gut" aria-label="Jump to section">
+  <div class="wrap">
+    <a href="#numbers-h">Numbers</a>
+    <a href="#news-h">News</a>
+    <a href="#global-h">FT &amp; Economist</a>
+    <a href="#sa-h">Analysis</a>
+    <a href="#agenda-h">Agenda</a>
+    <a href="#archives">Archive</a>
+  </div>
+</nav>
+
+<main class="gut">
+<div class="wrap">
+
+  <section class="sec" aria-labelledby="numbers-h">
+    <p class="desk">Key numbers</p>
+    <h2 id="numbers-h">Monday afternoon: stocks bounce, oil sinks, shekel firms</h2>
+    <div class="rail" tabindex="0" aria-label="Key numbers, scroll sideways">
+<article class="tile big">
+<div class="tlabel">Number of the day</div>
+<div class="tnum" style="color:var(--down)">$94.02</div>
+<h3>Brent's 4.4% drop takes pressure off inflation</h3>
+<p>Brent fell $4.30 from Friday's settlement, extending last week's 16% slide, its worst since 2020. Trump told CNN a new wave of strikes on Iran is "highly unlikely" if talks on its nuclear programme and the Strait of Hormuz progress, though Rubio played down hopes of fast progress. Cheaper energy eased inflation worries on the eve of US CPI: the 10-year Treasury yield is 4.85%, gilts and Bunds rallied, and the shekel gained almost 1%. It also helped equities shrug off Nvidia's slide.</p>
+<div class="src">Bloomberg quote page 16:47 Tel Aviv and Markets Wrap; The Economist, 9/11</div>
+</article>
+<article class="tile">
+<div class="tlabel">United States · live, first 30 minutes</div>
+<div class="rows">
+<div class="row"><div class="k">S&amp;P 500<small>YTD +9.3% · 16:42</small></div><div class="v">7,481.43</div><div class="chg up">+1.42%</div></div>
+<div class="row"><div class="k">Dow Jones<small>YTD +8.2% · 16:59</small></div><div class="v">51,998.72</div><div class="chg up">+1.39%</div></div>
+<div class="row"><div class="k">Nasdaq Composite<small>YTD +8.1% · 16:58</small></div><div class="v">25,114.44</div><div class="chg up">+2.18%</div></div>
+<div class="row"><div class="k">Nasdaq 100<small>YTD +9.7% · 16:58</small></div><div class="v">27,667.65</div><div class="chg up">+2.51%</div></div>
+<div class="row"><div class="k">VIX<small>16:40</small></div><div class="v">22.21</div><div class="chg down">−13.4%</div></div>
+<div class="row"><div class="k">Nvidia<small>16:44</small></div><div class="v">$176.16</div><div class="chg down">−5.62%</div></div>
+<div class="row"><div class="k">AMD<small>16:37 · Oppenheimer upgrade</small></div><div class="v">$474.44</div><div class="chg up">+5.66%</div></div>
+</div>
+<div class="src">Bloomberg quote pages, 16:37-16:59 Tel Aviv, against Friday's close. Alphabet +3.8%, Tesla +5.1%.</div>
+</article>
+<article class="tile">
+<div class="tlabel">Europe &amp; Asia</div>
+<div class="rows">
+<div class="row"><div class="k">Stoxx 600<small>YTD +10.6% · 16:30</small></div><div class="v">654.93</div><div class="chg up">+1.02%</div></div>
+<div class="row"><div class="k">German 10-year<small>Bloomberg wrap</small></div><div class="v">3.23%</div><div class="chg down">−2 bp</div></div>
+<div class="row"><div class="k">UK 10-year<small>Bloomberg wrap</small></div><div class="v">5.10%</div><div class="chg down">−5 bp</div></div>
+<div class="row"><div class="k">Hang Seng<small>close</small></div><div class="v">24,448.95</div><div class="chg down">−0.13%</div></div>
+</div>
+<div class="src">Bloomberg, 16:30-16:50 Tel Aviv. The morning edition's Nikkei (+2.3%) and Taiex (+4.9%) moves came from Asia's session.</div>
+</article>
+<article class="tile">
+<div class="tlabel">United States · Treasuries</div>
+<div class="rows">
+<div class="row"><div class="k">2-year</div><div class="v">4.54%</div><div class="chg up">+2.9 bp</div></div>
+<div class="row"><div class="k">5-year</div><div class="v">4.65%</div><div class="chg up">+0.7 bp</div></div>
+<div class="row"><div class="k">10-year</div><div class="v">4.85%</div><div class="chg down">−1.0 bp</div></div>
+<div class="row"><div class="k">30-year</div><div class="v">5.25%</div><div class="chg down">−1.1 bp</div></div>
+<div class="row"><div class="k">2s10s curve</div><div class="v">+31 bp</div><div class="chg flat">flatter</div></div>
+</div>
+<div class="src">Bloomberg generic yields, 16:39-16:59 Tel Aviv. The short end edges up ahead of CPI, with markets still pricing a December hike.</div>
+</article>
+<article class="tile">
+<div class="tlabel">Israel · stocks &amp; policy</div>
+<div class="rows">
+<div class="row"><div class="k">TA-35<small>YTD +9.7% · 16:33</small></div><div class="v">3,982.56</div><div class="chg up">+1.05%</div></div>
+<div class="row"><div class="k">TA-125<small>YTD +5.7% · 16:44</small></div><div class="v">3,873.18</div><div class="chg up">+1.30%</div></div>
+<div class="row"><div class="k">TA-Insurance<small>Calcalist, 15:51</small></div><div class="v">n/a</div><div class="chg up">+3.6%</div></div>
+<div class="row"><div class="k">Budget deficit<small>12 months to October</small></div><div class="v">3.3% GDP</div><div class="chg down">+0.1 pt</div></div>
+<div class="row"><div class="k">Bank of Israel rate<small>last decision: hold</small></div><div class="v">3.25%</div><div class="chg flat">hold</div></div>
+</div>
+<div class="src">Bloomberg (indices, live), Calcalist (sectors), Globes (deficit). TASE closes ~17:25, after this read. Bank of Israel rate carried from earlier editions.</div>
+</article>
+<article class="tile">
+<div class="tlabel">Israel · Shahar curve</div>
+<div class="rows">
+<div class="row"><div class="k">Aug 2029<small>GOI0829 · price 103.54</small></div><div class="v">3.63%</div><div class="chg up">+0.15%</div></div>
+<div class="row"><div class="k">Jul 2031<small>GOI0731 · price 100.88</small></div><div class="v">3.83%</div><div class="chg up">+0.22%</div></div>
+<div class="row"><div class="k">Oct 2035<small>GOI1035 · price 100.41</small></div><div class="v">4.16%</div><div class="chg up">+0.43%</div></div>
+<div class="row"><div class="k">Nov 2052<small>GOI1152 · price 73.51</small></div><div class="v">4.82%</div><div class="chg up">+0.70%</div></div>
+<div class="row"><div class="k">Oct 2035 vs US 10y<small>Israel yields below Treasuries</small></div><div class="v">−69 bp</div><div class="chg flat"></div></div>
+</div>
+<div class="src">TASE security pages ~16:55. The change column is today's price change; TASE still shows yields as of 6/11, so today's rally (prices up) means actual yields are lower. Calcalist put the 10-year Shahar at 4.13% at 11:51. Spread = 4.16% minus US 10y 4.85%.</div>
+</article>
+<article class="tile">
+<div class="tlabel">Currencies</div>
+<div class="rows">
+<div class="row"><div class="k">USD/ILS<small>Fri close 3.1890 · YTD −0.8%</small></div><div class="v">3.1590</div><div class="chg down">−0.94%</div></div>
+<div class="row"><div class="k">EUR/ILS<small>YTD −5.5%</small></div><div class="v">3.5371</div><div class="chg down">−0.44%</div></div>
+<div class="row"><div class="k">EUR/USD</div><div class="v">1.1196</div><div class="chg up">+0.48%</div></div>
+<div class="row"><div class="k">Dollar index</div><div class="v">101.87</div><div class="chg down">−0.42%</div></div>
+<div class="row"><div class="k">USD/JPY</div><div class="v">158.07</div><div class="chg down">−0.26%</div></div>
+</div>
+<div class="src">Bloomberg, 16:45-16:58 Tel Aviv. A lower USD/ILS means a stronger shekel. Calcalist (16:53) has the dollar at 3.16.</div>
+</article>
+<article class="tile">
+<div class="tlabel">Energy &amp; gold</div>
+<div class="rows">
+<div class="row"><div class="k">Brent<small>Fri settle $98.32</small></div><div class="v">$94.02</div><div class="chg down">−4.37%</div></div>
+<div class="row"><div class="k">WTI<small>Fri settle $90.83</small></div><div class="v">$87.50</div><div class="chg down">−3.67%</div></div>
+<div class="row"><div class="k">Natural gas (Henry Hub)<small>cooler US forecasts</small></div><div class="v">$3.14</div><div class="chg up">+4.77%</div></div>
+<div class="row"><div class="k">Gold</div><div class="v">$4,122.70</div><div class="chg up">+1.27%</div></div>
+</div>
+<div class="src">Bloomberg, 16:47-16:58 Tel Aviv.</div>
+</article>
+<article class="tile">
+<div class="tlabel">Crypto · live</div>
+<div class="rows">
+<div class="row"><div class="k">Bitcoin<small>YTD −14.8%</small></div><div class="v">$74,716</div><div class="chg up">+0.88%</div></div>
+<div class="row"><div class="k">Ether<small>YTD −28.6%</small></div><div class="v">$2,126</div><div class="chg flat">−0.01%</div></div>
+</div>
+<div class="src">Bloomberg, 16:58 Tel Aviv. Change against the previous day.</div>
+</article>
+    </div>
+    <p class="hint">← scroll sideways →</p>
+  </section>
+
+  <section class="sec" aria-labelledby="focus-h">
+    <p class="desk">Edition focus</p>
+    <h2 id="focus-h">Afternoon view: Wall Street's open, rates and Tel Aviv's close</h2>
+    <div class="focus">
+      <div class="fbox">
+        <h3>Wall Street's first minutes</h3>
+        <ul>
+          <li>Broad rebound: S&amp;P 500 +1.4%, Nasdaq 100 +2.5%, chip gauge +3.5%.</li>
+          <li>Nvidia −5.6% is the outlier; AMD +5.7% after an Oppenheimer upgrade.</li>
+          <li>Alphabet +3.8% as Google widens its AI chip line-up against Nvidia.</li>
+          <li>JPMorgan sees signs of capitulation after the biggest momentum unwind in ~40 years.</li>
+        </ul>
+      </div>
+      <div class="fbox">
+        <h3>US data &amp; rates</h3>
+        <ul>
+          <li>No major US data at 15:30 today; September wholesale inventories were revised up a notch.</li>
+          <li>Tuesday 15:30: October CPI, the last before the December Fed meeting.</li>
+          <li>2-year yield +3 bp to 4.54%; 10-year 4.85% as oil falls.</li>
+          <li>UBS (via Bizportal) expects two Fed hikes and favours short, high-quality bonds.</li>
+        </ul>
+      </div>
+      <div class="fbox note">
+        <h3>Tel Aviv into the close &amp; Europe</h3>
+        <ul>
+          <li>TA-125 +1.3%; insurers +3.6%, defence stocks +2.4%, banks lag.</li>
+          <li>NextVision ~+10% on results; Palo Alto −4% and Tower −5% on arbitrage.</li>
+          <li>Turnover passed NIS 3.1bn an hour before the close.</li>
+          <li>Stoxx 600 +1.0%; gilts rally 5 bp; Merz threatens the EU budget over Ukraine aid.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="news-h">
+    <p class="desk">News of the day</p>
+    <h2 id="news-h">The stories behind the numbers</h2>
+    <div class="chips" role="group" aria-label="Filter news">
+      <button class="chip" type="button" data-desk="all" aria-pressed="true">All</button>
+      <button class="chip" type="button" data-desk="us" aria-pressed="false">US</button>
+      <button class="chip" type="button" data-desk="israel" aria-pressed="false">Israel</button>
+      <button class="chip" type="button" data-desk="energy" aria-pressed="false">Energy</button>
+      <button class="chip" type="button" data-desk="crypto" aria-pressed="false">Crypto</button>
+    </div>
+    <div class="cards" id="cards">
+<article class="card" data-desk="us">
+<div class="top"><span class="tag">US · Wall Street open</span></div>
+<div class="cnum up">+2.5%</div>
+<h3>Dip buyers return after the AI rout</h3>
+<p>The Nasdaq 100 is up 2.5% and the S&amp;P 500 1.4% half an hour into trading, with the VIX down 13% to 22. JPMorgan's strategists say last week's momentum unwind was the biggest in about 40 years and see signs of investor capitulation. E*Trade calls it a reshuffle within the AI trade rather than an exit. UBS suggests investors who are overweight tech use rallies to rebalance.</p>
+<div class="foot"><span class="src">Bloomberg · 9/11</span><a href="https://www.bloomberg.com/news/articles/2026-11-08/stock-market-today-dow-s-p-live-updates" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="us">
+<div class="top"><span class="tag">US · Nvidia</span></div>
+<div class="cnum down">−5.6%</div>
+<h3>Nvidia slides as the spy story deepens</h3>
+<p>Nvidia fell as much as 7% early on after its board opened a probe into Huang's affair. The FT reports that Alice Huang, the woman US officials suspect of spying for China, pitched a south-east Asia data-centre deal to Chinese investors in 2025, saying she had "no problem securing GPUs". She cited Alibaba as a client and did not disclose her ties to Huang. China's foreign ministry calls the spy claims groundless.</p>
+<div class="foot"><span class="src">FT · Bloomberg · 9/11</span><a href="https://www.ft.com/content/5d8c1e1d-6ce0-4eb4-9f5c-722fa5c4841d" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="us">
+<div class="top"><span class="tag">US · movers</span></div>
+<div class="cnum up">+5.7%</div>
+<h3>AMD, Alphabet and Tesla lead the bounce</h3>
+<p>AMD is up 5.7% after Oppenheimer upgraded it to outperform following what it called another bullish earnings call. Alphabet gains 3.8% as Google rolls out more versions of its TPU AI chips to challenge Nvidia. Tesla is up 5.1%; Musk says it will return many Cybertruck deposits. McDonald's will favour Uber over DoorDash for app delivery in 14 countries.</p>
+<div class="foot"><span class="src">Bloomberg · 9/11</span><a href="https://www.bloomberg.com/news/articles/2026-11-09/google-escalates-nvidia-rivalry-with-new-versions-of-its-tpu-systems" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="us">
+<div class="top"><span class="tag">US · IPO</span></div>
+<div class="cnum flat">$1.1-1.3tn</div>
+<h3>Anthropic can start marketing its IPO on Tuesday</h3>
+<p>The 15-day waiting period after Anthropic's public filing ends, so it can begin roadshow meetings as early as Tuesday and list on Nasdaq the week of 16 November. Potential investors have discussed a $1.1-1.3tn valuation, well below last month's talk. Retail buyers may get up to 20% of the shares. Bloomberg says slower quarterly revenue growth and data-centre politics are the main worries.</p>
+<div class="foot"><span class="src">Bloomberg · Bizportal · 9/11</span><a href="https://www.bloomberg.com/news/articles/2026-11-09/anthropic-ipo-s-moment-of-truth-nears-as-waiting-period-expires" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="us">
+<div class="top"><span class="tag">US · Fed &amp; CPI</span></div>
+<div class="cnum up">+0.3%</div>
+<h3>Tuesday's CPI is unlikely to stop a December hike</h3>
+<p>RBC expects October core CPI to rise 0.3% on the month, citing accelerating goods prices from clothes to toys; there will be no annual rate because of data gaps from last year's shutdown. Citi says the report should not change expectations of a December Fed hike. The 2-year yield is up 3 bp to 4.54%. Bizportal reports UBS now expects two hikes.</p>
+<div class="foot"><span class="src">FT · Bizportal · 8-9/11</span><a href="https://www.ft.com/content/3d46dfb4-eef8-4ea0-9264-282bd269647e" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="energy">
+<div class="top"><span class="tag">Energy · oil &amp; Iran</span></div>
+<div class="cnum down">−4.4%</div>
+<h3>Brent sinks to $94 on Iran peace hopes</h3>
+<p>Brent is down to $94.02 and WTI to $87.50 as optimism grows about ending the Iran war. Trump struck a softer tone, though Rubio said fast progress in talks is unlikely. Bloomberg says lower energy costs are pulling bond yields down. US natural gas bucks the trend, up 4.8% on short covering after cooler weather forecasts.</p>
+<div class="foot"><span class="src">Bloomberg · 9/11</span><a href="https://www.bloomberg.com/news/articles/2026-11-08/stock-market-today-dow-s-p-live-updates" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="israel">
+<div class="top"><span class="tag">Israel · TASE</span></div>
+<div class="cnum up">+1.3%</div>
+<h3>Tel Aviv climbs as NextVision soars on results</h3>
+<p>The TA-125 is up 1.3% after briefly slipping into the red late in the morning. NextVision jumped up to 13%: third-quarter revenue was $106.3m, net profit $60m, and it expects 2026 revenue of $355m, up 111%. Bizportal notes its backlog shrank 21%. Insurers rose 3.6%, while Palo Alto and Tower fell 4-5% on negative arbitrage with Wall Street. Finergy and Gilat also gained.</p>
+<div class="foot"><span class="src">Calcalist · Bizportal · 9/11</span><a href="https://www.calcalist.co.il/market/article/lj542f8h9" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="israel">
+<div class="top"><span class="tag">Israel · shekel</span></div>
+<div class="cnum up">3.159</div>
+<h3>Dollar slides against the shekel</h3>
+<p>The dollar fell 0.9% to 3.159 shekels on Bloomberg, and Calcalist reports 3.16, as the dollar weakens worldwide and risk appetite returns. The euro is down 0.4% at 3.537. The shekel hit a seven-month low last week, when the dollar topped 3.22 during the tech rout. Cheaper oil and rising Israeli stocks both support the currency.</p>
+<div class="foot"><span class="src">Bloomberg · Calcalist · 9/11</span><a href="https://www.calcalist.co.il/market/article/r4cfcuml6" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="israel">
+<div class="top"><span class="tag">Israel · budget</span></div>
+<div class="cnum down">3.3%</div>
+<h3>Israel's deficit widens on defence spending</h3>
+<p>The 12-month deficit rose to 3.3% of GDP in October, or NIS 74bn, from 3.2% in September, the Accountant General reported. October alone showed a NIS 18.3bn gap. Revenue is up 10% so far this year against 4.2% growth in spending, but defence spending climbed again; Bizportal puts the jump near 10%. This comes as the 2027 budget awaits the next coalition.</p>
+<div class="foot"><span class="src">Globes · Bizportal · 9/11</span><a href="https://en.globes.co.il/en/article-israels-fiscal-deficit-widens-1001562558" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="israel">
+<div class="top"><span class="tag">Israel · companies</span></div>
+<div class="cnum up">NIS 500m</div>
+<h3>Partner's special dividend; Mizrahi heads to Wall Street</h3>
+<p>Partner rose about 6% after its board approved a NIS 500m special dividend, subject to a new bond issue; quarterly profit hit a 14-year high, with revenue up 5.7%. Separately, Globes says Citibank has registered up to 50 million ADRs for Mizrahi Tefahot. US investors will be able to buy the bank in dollars during US hours. Citi acted on its own, without the bank's approval.</p>
+<div class="foot"><span class="src">Globes · Calcalist · 9/11</span><a href="https://en.globes.co.il/en/article-citibank-registers-mizrahi-tefahot-adrs-for-trading-in-us-1001562563" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="energy">
+<div class="top"><span class="tag">Energy · Israel gas</span></div>
+<div class="cnum flat">50%</div>
+<h3>Murphy Oil replaces ENI as Ratio's gas partner</h3>
+<p>The Energy Ministry has finally granted the offshore exploration licences Ratio won in late 2023, now with US-based Murphy Oil holding 50% in place of ENI, which pulled out for political reasons. The partners have up to three years to explore in Israel's economic waters. The ministry is also loosening entry terms for its fifth bidding round to attract more firms.</p>
+<div class="foot"><span class="src">Globes · Calcalist · 9/11</span><a href="https://en.globes.co.il/en/article-ratio-replaces-eni-with-us-partner-for-gas-exploration-1001562548" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card" data-desk="crypto">
+<div class="top"><span class="tag hl">Crypto · headline</span></div>
+<div class="cnum up">$74.7k</div>
+<h3>Coinbase wins its trust-bank charter</h3>
+<p>Bitcoin is up 0.9% to $74,716 and Ether flat at $2,126. Bloomberg headlines say Coinbase got final approval to become a nationally chartered trust bank, and Binance's CFO has left after a $6bn crypto heist. Calcalist warns the industry's ties to Trump could prove costly under a Democratic Congress. Headlines only.</p>
+<div class="foot"><span class="src">Bloomberg · Calcalist · 9/11</span><a href="https://www.bloomberg.com/markets" target="_blank" rel="noopener">Read →</a></div>
+</article>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="global-h">
+    <p class="desk">Global view · FT &amp; The Economist</p>
+    <h2 id="global-h">The world beyond the tickers</h2>
+
+    <h3 class="sub">The Economist · The world in brief, 9 November</h3>
+    <ul class="brief">
+<li><b>Nvidia</b><span>Nvidia's shares fell as markets reacted to the spying scandal. The board is probing reports that Huang had a relationship with a suspected Chinese spy; he admitted an affair, but the firm says it has no sign secrets were compromised.</span></li>
+<li><b>Iran</b><span>Trump says a new wave of strikes on Iran is "highly unlikely" if talks on its nuclear programme and Hormuz progress. Many had expected attacks to resume after midterms in which the war hurt Republicans. He also admitted his immigration crackdown was "too tough".</span></li>
+<li><b>US-China</b><span>China extended its suspension of higher tariffs and other measures against America by two months. It will wait until at least January before raising tariffs on US goods by 24%, charging port fees on US ships or ending some rare-earth export waivers.</span></li>
+<li><b>KKR</b><span>KKR posted record quarterly profit: adjusted net income rose 29% to $1.65bn on higher fees and dividends from its holdings, offsetting weaker insurance profits.</span></li>
+<li><b>Middle East</b><span>Jordan and Syria will jointly investigate a Jordanian airstrike that killed civilians in Syria last month, a sign of warming ties since Assad's fall.</span></li>
+<li><b>Ukraine</b><span>Figure of the day: Ukraine's fertility rate has fallen to 0.8-0.9 children per woman, from 1.2 before the war.</span></li>
+    </ul>
+    <p class="src" style="margin-top:8px">Summarized from The Economist's World in Brief, 9/11 (updated minutes before the read; Bangladesh and a human-interest item omitted) · <a href="https://www.economist.com/the-world-in-brief" target="_blank" rel="noopener">Read →</a></p>
+
+    <h3 class="sub">Financial Times · key reads</h3>
+    <p class="src" style="margin:-4px 0 12px">All four cards are based on the full article text.</p>
+    <div class="cards">
+<article class="card">
+<div class="top"><span class="tag hl">FT · Nvidia scoop</span></div>
+<div class="cnum flat">$3bn</div>
+<h3>The woman in the Nvidia scandal sold GPU access</h3>
+<p>Alice Huang and a partner who sits on a Chinese state bank's board pitched a data-centre project worth several hundred million dollars, stressing easy access to Nvidia chips. Megaspeed, the Singapore firm she was linked to, saw its balance sheet grow from $33m to $3bn in 2024, partly on an Alibaba leasing deal and loan. Megaspeed is under investigation over alleged chip smuggling, which it denies.</p>
+<div class="foot"><span class="src">Financial Times · 9/11</span><a href="https://www.ft.com/content/5d8c1e1d-6ce0-4eb4-9f5c-722fa5c4841d" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card">
+<div class="top"><span class="tag hl">FT · Japan &amp; AI</span></div>
+<div class="cnum down">−60%</div>
+<h3>The AI selloff exposes SoftBank's all-in bet</h3>
+<p>SoftBank shares, and its Arm stake, are down about 60% since June ahead of Tuesday's results. The planned $50bn listing of SB Energy, its US data-centre power arm, may be delayed after Democrats' gains in Texas politics. Analysts put its loan-to-value ratio at 18-22%, up from 13%, and its credit default swaps have widened. A weak Anthropic IPO could also cloud OpenAI's listing, its biggest bet.</p>
+<div class="foot"><span class="src">Financial Times · 9/11</span><a href="https://www.ft.com/content/e19c86dc-9437-4827-a5ae-14bd4033037b" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card">
+<div class="top"><span class="tag hl">FT · Week ahead</span></div>
+<div class="cnum flat">$126bn</div>
+<h3>CPI, China's trade surplus and UK growth</h3>
+<p>Beyond US CPI on Tuesday, economists expect China's October trade surplus near $126bn, with exports up 38%, putting it on track to beat last year's record $1.2tn. The PBoC is leaning against further yuan gains. UK third-quarter GDP on Thursday is seen up 0.7%, even after the Bank of England raised rates to 4%.</p>
+<div class="foot"><span class="src">Financial Times · 8/11</span><a href="https://www.ft.com/content/3d46dfb4-eef8-4ea0-9264-282bd269647e" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card">
+<div class="top"><span class="tag hl">FT · Europe</span></div>
+<div class="cnum flat">€70bn</div>
+<h3>Merz threatens EU budget over Ukraine aid</h3>
+<p>In a letter to António Costa, Germany's chancellor says he will block the EU's 2028-34 budget unless every member state helps close Ukraine's €70bn funding gap for 2027. Hungary, Slovakia, Bulgaria and the Czech Republic have signalled they will not contribute. Berlin also wants future Ukraine funding decided by qualified majority. Leaders meet in Dublin on Thursday and Friday.</p>
+<div class="foot"><span class="src">Financial Times · 9/11</span><a href="https://www.ft.com/content/ec66a5d6-70f1-47fc-b573-067dd96dc913" target="_blank" rel="noopener">Read →</a></div>
+</article>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="sa-h">
+    <p class="desk">Analyst view · Seeking Alpha</p>
+    <h2 id="sa-h">Buying the AI dip: where contributors see value</h2>
+    <p class="src" style="margin:-6px 0 16px">Takeaways from each article's Summary bullets (trending analysis, 5-9 November). These are contributors' opinions, not recommendations. Today's trending list was mostly bullish; for the bear case see the morning edition's Sungarden piece.</p>
+    <div class="cards sa">
+<article class="card">
+<div class="top"><span class="tag">Mixed · Nvidia</span></div>
+<div class="cnum flat">3 paths</div>
+<h3>The Huang honeypot: can AI recover?</h3>
+<ul class="tk">
+<li>Nvidia faces a governance crisis; the board backs management for now.</li>
+<li>Author sees three outcomes: forced exit, a curbed public role, or a shift to "chief architect".</li>
+<li>Sees the pullback as an entry point, favouring AMD over Nvidia.</li>
+<li>Risk: more volatility while the probe runs.</li>
+</ul>
+<div class="foot"><span class="src">Uttam Dey · 9/11</span><a href="https://seekingalpha.com/article/4964943-the-huang-honeypot-can-ai-recover" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card">
+<div class="top"><span class="tag">Bull · AMD</span></div>
+<div class="cnum up">13x</div>
+<h3>AMD: a $100bn revenue target is in sight</h3>
+<ul class="tk">
+<li>Data-centre sales seen up 50% quarter on quarter in Q4.</li>
+<li>OpenAI, Meta and Anthropic GPU deals could bring $60bn+ in 2027.</li>
+<li>Guidance implies ~80% growth in 2027, to about $94bn.</li>
+<li>Trades at ~13x the author's 2028 EPS target of ~$25.</li>
+</ul>
+<div class="foot"><span class="src">Stone Fox Capital · bullish</span><a href="https://seekingalpha.com/article/4964583-amd-100-billion-target-appears-set" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card">
+<div class="top"><span class="tag">Bull · SK hynix</span></div>
+<div class="cnum up">$180</div>
+<h3>SK hynix at 5x earnings after a profit drop</h3>
+<ul class="tk">
+<li>Net profit fell 58% on investment and FX losses, not operations.</li>
+<li>Record ~80% operating margin; revenue up 328% year on year.</li>
+<li>$74bn net cash; over half of 2027-28 capacity contracted.</li>
+<li>Strong Buy, target $180 (~44% upside); watch Nvidia's 17 Nov report.</li>
+</ul>
+<div class="foot"><span class="src">Benjamin C. Barry · Strong Buy</span><a href="https://seekingalpha.com/article/4964930-sk-hynix-profit-tanks-58-percent-buy-now-at-5x-earnings" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card">
+<div class="top"><span class="tag">Bull · ServiceNow</span></div>
+<div class="cnum down">−32%</div>
+<h3>ServiceNow: buying the post-earnings collapse</h3>
+<ul class="tk">
+<li>Stock is down 32% since results despite a beat and raise.</li>
+<li>Subscription revenue +20.5%, current RPO +21.5% at constant currency.</li>
+<li>AI contract value guidance raised a third time, to $1.7bn annualised.</li>
+<li>Author is adding at about 21x 2027 earnings.</li>
+</ul>
+<div class="foot"><span class="src">David Desjardins · bullish</span><a href="https://seekingalpha.com/article/4964887-servicenow-capitalizing-on-a-32-percent-post-earnings-collapse" target="_blank" rel="noopener">Read →</a></div>
+</article>
+<article class="card">
+<div class="top"><span class="tag">Bull · REITs</span></div>
+<div class="cnum up">2 years</div>
+<h3>The blue wave could turn green for REITs</h3>
+<ul class="tk">
+<li>Expects REITs to beat the S&amp;P 500 over the next two years.</li>
+<li>Cheap valuations, solid balance sheets and possible M&amp;A.</li>
+<li>Favours digital infrastructure, healthcare and industrial property.</li>
+<li>Pitch: income plus growth, whatever the politics.</li>
+</ul>
+<div class="foot"><span class="src">Brad Thomas · bullish</span><a href="https://seekingalpha.com/article/4964830-blue-wave-could-turn-into-green-wave-for-reit-investors" target="_blank" rel="noopener">Read →</a></div>
+</article>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="agenda-h">
+    <p class="desk">Agenda · Tel Aviv time</p>
+    <h2 id="agenda-h">The week ahead</h2>
+    <div class="agenda">
+      <div class="ag"><div class="d">Mon 9 Nov</div><ul><li>TASE closes ~17:25</li><li>After 23:00: Occidental, Take-Two, Rocket Lab, AST SpaceMobile</li></ul></div>
+      <div class="ag"><div class="d">Tue 10 Nov</div><ul><li>15:30 US CPI for October (FT, Bloomberg)</li><li>China October trade data; SoftBank half-year results</li><li>Anthropic IPO marketing can start (Bloomberg)</li><li>Before the bell: Wix, Sea, TransDigm. After 23:00: CoreWeave, Rigetti</li><li>EIA oil outlook; Russia-Ukraine talks start in Abu Dhabi</li></ul></div>
+      <div class="ag"><div class="d">Wed 11 Nov</div><ul><li>US Veterans Day: stocks open, bond market normally closed</li><li>OPEC monthly oil report</li><li>After 23:00: Franco-Nevada, Corteva</li></ul></div>
+      <div class="ag"><div class="d">Thu 12 Nov</div><ul><li>UK third-quarter GDP (FT)</li><li>EU leaders meet in Dublin, Thu-Fri: Ukraine funding (FT)</li><li>Before the bell: Brookfield, Nebius. After 23:00: Cisco, Applied Materials</li></ul></div>
+      <div class="ag"><div class="d">Fri 13 Nov</div><ul><li>IEA monthly oil report</li><li>TASE closes ~13:50</li></ul></div>
+      <div class="ag"><div class="d">Later in November</div><ul><li>Tue 17 Nov: Nvidia earnings (per Seeking Alpha; not checked against Nvidia)</li><li>Week of 16 Nov: possible Anthropic pricing and Nasdaq debut (Bloomberg)</li><li>Wed 18 Nov: House Republicans' requested Huang briefing (earlier edition)</li><li>Thu 26 Nov: US Thanksgiving, market closed</li><li>Israel October CPI and next Bank of Israel decision (dates not verified)</li></ul></div>
+    </div>
+    <p class="src" style="margin-top:8px">Sources: Bloomberg, FT, Seeking Alpha, Yahoo Finance (earnings dates carried from the morning edition). US Eastern time is 7 hours behind Tel Aviv (both countries on winter time), so Wall Street trades 16:30–23:00. "Before the bell" and "after" are company report slots, not exact times.</p>
+  </section>
+
+  <section class="sec" aria-labelledby="wa-h">
+    <p class="desk">Share</p>
+    <h2 id="wa-h">The briefing in one message</h2>
+    <div class="panel">
+      <p style="margin:0">Copies this edition as a WhatsApp-ready text.</p>
+      <button class="btn" id="copyBtn" type="button">Copy message</button>
+      <div class="status" id="copyStatus" role="status"></div>
+      <textarea id="copyOut" hidden readonly aria-label="Briefing text"></textarea>
+    </div>
+  </section>
+
+  <section class="sec" id="archives" aria-labelledby="arch-h">
+    <p class="desk">Archive</p>
+    <h2 id="arch-h">Archived edition</h2>
+    <div class="panel">
+      <ul class="arch">
+        <li><span>Monday 9 November 2026 · 17:05 · Afternoon edition</span><span class="cur">Current</span></li>
+        <li><a href="2026-11-09-0920.html">Monday 9 November 2026 · 09:20 · Morning edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-08-0605.html">Sunday 8 November 2026 · 06:05 · Morning edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-07-2336.html">Saturday 7 November 2026 · 23:36 · Night edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-07-1650.html">Saturday 7 November 2026 · 16:50 · Afternoon edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-07-0610.html">Saturday 7 November 2026 · 06:10 · Morning edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-06-2340.html">Friday 6 November 2026 · 23:40 · Night edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-06-1715.html">Friday 6 November 2026 · 17:15 · Afternoon edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-06-0610.html">Friday 6 November 2026 · 06:10 · Morning edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-05-2350.html">Thursday 5 November 2026 · 23:50 · Night edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-05-1705.html">Thursday 5 November 2026 · 17:05 · Afternoon edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-05-1202.html">Thursday 5 November 2026 · 12:02 · Midday market update</a><span class="src">archived</span></li>
+        <li><a href="2026-11-05-0610.html">Thursday 5 November 2026 · 06:10 · Morning edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-04-1700.html">Wednesday 4 November 2026 · 17:00 · Afternoon edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-03-2340.html">Tuesday 3 November 2026 · 23:40 · Night edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-03-1700.html">Tuesday 3 November 2026 · 17:00 · Afternoon edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-03-0920.html">Tuesday 3 November 2026 · 09:20 · Midday edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-02-1715.html">Monday 2 November 2026 · 17:15 · Afternoon edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-02-1200.html">Monday 2 November 2026 · 12:00 · Midday edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-02-0615.html">Monday 2 November 2026 · 06:15 · Morning edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-01-2330.html">Sunday 1 November 2026 · 23:30 · Night edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-01-1645.html">Sunday 1 November 2026 · 16:45 · Afternoon edition</a><span class="src">archived</span></li>
+        <li><a href="2026-11-01-1315.html">Sunday 1 November 2026 · 13:15 · Weekend edition</a><span class="src">archived</span></li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer class="gut">
+  <div class="wrap" style="display:grid;gap:14px">
+    <h2>Sources and method</h2>
+    <p class="legal">Market numbers are Bloomberg quote-page values read 16:30-16:59 Tel Aviv on Monday 9/11, about 30 minutes after Wall Street's 16:30 open; each card shows its time. US stocks, Treasuries, currencies, energy, gold, crypto and Israeli indices are live; the Stoxx 600 is a 16:30 value and the Hang Seng is Monday's close. Changes are against Friday's close or settlement. German and UK 10-year yields come from Bloomberg's Markets Wrap text. TASE closes at ~17:25, after this read, so Israeli index values are intraday. The TA-Insurance move is Calcalist's. Shahar yields: TASE pages still show gross yields as of 6/11 alongside today's prices; we show both and do not estimate today's yield; Calcalist reported 4.13% for the 10-year at 11:51. USD/ILS: Bloomberg 3.1590 versus 3.16 on Calcalist; consistent. Nvidia's drop: Bloomberg quote −5.6% at 16:44, FT "7% in early trading", Bizportal 7.7%; we keep Bloomberg's quote. The Bank of Israel rate is carried from earlier editions. Yahoo Finance's stock-market page was read for headlines only; this week's earnings dates are carried from the morning edition, which used Yahoo's calendar. Nvidia's 17 Nov earnings date comes from a Seeking Alpha contributor. One FT article (Monetary Policy Radar, on payrolls and a December hike) was behind an extra paywall and is not used. Cards tagged headline come from headlines only. Seeking Alpha cards summarize authors' opinion bullets. Summaries are written for this page and link to the original articles. Nothing here is investment advice.</p>
+  </div>
+</footer>
+
+
+<script>
+(function(){
+  var chips=document.querySelectorAll('.chip');
+  var cards=document.querySelectorAll('#cards .card');
+  chips.forEach(function(c){
+    c.addEventListener('click',function(){
+      var d=c.dataset.desk;
+      chips.forEach(function(x){x.setAttribute('aria-pressed',x===c?'true':'false');});
+      cards.forEach(function(k){k.hidden = d!=='all' && k.dataset.desk!==d;});
+    });
+  });
+
+
+  var msg=[
+    "*Shekel & Street · Afternoon edition · Mon 9/11/2026 17:05*",
+    "",
+    "*Number of the day: Brent $94.02 (-4.4%)*",
+    "Trump says new Iran strikes are 'highly unlikely'; cheaper oil eases inflation fears ahead of Tuesday's CPI (Bloomberg).",
+    "",
+    "*US (first 30 minutes)*",
+    "1. S&P 500 7,481 (+1.4%), Nasdaq 100 +2.5%, Dow +1.4%; VIX 22. JPMorgan sees signs of capitulation.",
+    "2. Nvidia -5.6% to $176; FT: the suspected spy pitched GPU deals to Chinese investors. AMD +5.7% (Oppenheimer upgrade), Alphabet +3.8%.",
+    "3. Anthropic can start IPO marketing Tuesday; $1.1-1.3tn valuation discussed. 2y 4.54% (+3bp), 10y 4.85%.",
+    "",
+    "*Israel*",
+    "4. TA-125 +1.3%, TA-35 +1.05%; NextVision ~+10% on results, insurers +3.6%, Partner +6% (NIS 500m special dividend).",
+    "5. USD/ILS 3.1590 (-0.9%). Deficit widens to 3.3% of GDP on defence spending (Globes).",
+    "6. Citibank registers Mizrahi Tefahot ADRs; Murphy Oil replaces ENI as Ratio's gas partner. Oct 2035 Shahar 4.16% (6/11), 69bp below US 10y.",
+    "",
+    "*Energy & crypto*",
+    "7. Brent $94.02, WTI $87.50; US gas +4.8%. Gold $4,123 (+1.3%).",
+    "8. Bitcoin $74.7k (+0.9%), Ether $2,126. Coinbase wins trust-bank charter.",
+    "",
+    "*FT & Economist*",
+    "9. FT: SoftBank's AI bet exposed (shares -60% since June); Merz threatens EU budget over Ukraine aid; week ahead: China trade, UK GDP.",
+    "10. Economist: China extends its tariff truce with the US by two months; KKR record profit.",
+    "",
+    "*Seeking Alpha takeaways*",
+    "11. Mostly bulls: AMD at ~13x 2028 EPS (Stone Fox); SK hynix Strong Buy, $180 target; ServiceNow bought after -32%; REITs to beat S&P. Nvidia governance: three scenarios (Uttam Dey).",
+    "",
+    "*Week ahead (Tel Aviv)*",
+    "Tue 15:30 US CPI, China trade, SoftBank, CoreWeave · Wed Veterans Day, OPEC · Thu UK GDP, Cisco, EU summit · Fri IEA · 17 Nov Nvidia.",
+    "",
+    "Sources: Bloomberg, FT, The Economist, Seeking Alpha, Globes, Calcalist, Bizportal, Yahoo Finance. Not investment advice."
+  ].join("\n");
+
+  var btn=document.getElementById('copyBtn'),out=document.getElementById('copyOut'),st=document.getElementById('copyStatus');
+  out.value=msg;
+  btn.addEventListener('click',function(){
+    function fallback(){out.hidden=false;out.focus();out.select();st.textContent="The text is selected. Copy it with your keyboard.";}
+    try{navigator.clipboard.writeText(msg).then(function(){st.textContent="Message copied.";},fallback);}catch(e){fallback();}
+  });
+})();
+</script>
+
+</body></html>
